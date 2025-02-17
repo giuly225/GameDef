@@ -1,0 +1,93 @@
+let player;
+let obstacle;
+let playerImage;
+let obstacleImage;
+
+function preload() {
+  // Carica le immagini
+  playerImage = loadImage('player.png'); // Sostituisci con il percorso corretto dell'immagine
+  obstacleImage = loadImage('obstacle.png'); // Sostituisci con il percorso corretto dell'immagine
+}
+
+function setup() {
+  createCanvas(800, 600);
+  player = new Player();
+  obstacle = new Obstacle();
+}
+
+function draw() {
+  background(220);
+
+  player.update();
+  player.display();
+
+  obstacle.update();
+  obstacle.display();
+
+  if (player.collidesWith(obstacle)) {
+    textSize(32);
+    fill(0);
+    text("Game Over", width / 2 - 100, height / 2);
+    noLoop();
+  }
+}
+
+// Classe per il personaggio
+class Player {
+  constructor() {
+    this.x = width / 2;
+    this.y = height - 50;
+    this.size = 50;
+  }
+
+  update() {
+    if (keyIsDown(LEFT_ARROW)) {
+      this.x -= 5;
+    }
+    if (keyIsDown(RIGHT_ARROW)) {
+      this.x += 5;
+    }
+    if (keyIsDown(UP_ARROW)) {
+      this.y -= 5;
+    }
+    if (keyIsDown(DOWN_ARROW)) {
+      this.y += 5;
+    }
+  }
+
+  display() {
+    image(playerImage, this.x, this.y, this.size, this.size); // Disegna l'immagine del personaggio
+  }
+
+  collidesWith(obstacle) {
+    return (
+      this.x < obstacle.x + obstacle.size &&
+      this.x + this.size > obstacle.x &&
+      this.y < obstacle.y + obstacle.size &&
+      this.y + this.size > obstacle.y
+    );
+  }
+}
+
+// Classe per l'ostacolo
+class Obstacle {
+  constructor() {
+    this.x = random(width);
+    this.y = 0;
+    this.size = 50;
+    this.speed = 2;
+  }
+
+  update() {
+    this.y += this.speed;
+
+    if (this.y > height) {
+      this.y = 0;
+      this.x = random(width);
+    }
+  }
+
+  display() {
+    image(obstacleImage, this.x, this.y, this.size, this.size); // Disegna l'immagine dell'ostacolo
+  }
+}
