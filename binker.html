@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bunker</title>
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .bunker-content {
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            border: 2px solid #3498db;
+        }
+        .stats {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+        }
+        .return-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .return-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="bunker-content">
+        <h1>Benvenuto nel Bunker</h1>
+        <div class="stats">
+            <h2>Risorse Raccolte:</h2>
+            <p>Punteggio: <span id="score">0</span></p>
+            <p>Acqua: <span id="water">0</span></p>
+            <p>Medicinali: <span id="medicines">0</span></p>
+            <p>Cibo: <span id="food">0</span></p>
+        </div>
+        <button class="return-button" onclick="window.history.back()">Ritorna al Gioco</button>
+    </div>
+
+    <script>
+        // Legge i parametri dall'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Aggiorna i valori nella pagina
+        document.getElementById('score').textContent = urlParams.get('score') || 0;
+        document.getElementById('water').textContent = urlParams.get('water') || 0;
+        document.getElementById('medicines').textContent = urlParams.get('medicines') || 0;
+        document.getElementById('food').textContent = urlParams.get('food') || 0;
+    </script>
+</body>
+</html>
