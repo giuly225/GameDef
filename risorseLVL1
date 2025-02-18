@@ -1,6 +1,7 @@
 // Variabili per il personaggio, l'ostacolo e i contatori
 let player;
 let obstacle;
+let gameOverButton; // Variabile per il pulsante Game Over
 let waters = []; // Array per l'acqua
 let medicines = []; // Array per i medicinali
 let foods = []; // Array per il cibo
@@ -43,13 +44,33 @@ function draw() {
   obstacle.display(); // Visualizziamo l'ostacolo
 
   // Controlliamo se il personaggio tocca l'ostacolo
-  if (player.collidesWith(obstacle)) {
-    textSize(32);
-    fill(0);
-    text("Game Over", width / 2 - 100, height / 2);
-    noLoop(); // Ferma il gioco
+// Controlliamo se il personaggio tocca l'ostacolo
+if (player.collidesWith(obstacle)) {
+  textSize(32);
+  fill(0);
+  text("Game Over", width / 2 - 100, height / 2);
+  
+  // Crea il pulsante "Torna al Bunker" solo quando è Game Over
+  if (!gameOverButton) {
+    gameOverButton = createButton('Torna al Bunker');
+    gameOverButton.position(width/2 - 60, height/2 + 50);
+    // Usa window.location invece di resetGame
+    gameOverButton.mousePressed(() => {
+      window.location.href = 'bunker.html';
+    });
   }
-
+  
+  noLoop(); // Ferma il gioco
+} else {
+  // Rimuove il pulsante quando non è Game Over
+  if (gameOverButton) {
+    gameOverButton.remove();
+    gameOverButton = null;
+  }
+}
+  
+  
+  
   // Incrementa il punteggio solo quando l'ostacolo è uscito dal fondo
   if (obstacle.y > height) {
     obstacle.y = 0; // Rientra dall'alto
@@ -125,8 +146,19 @@ function resetGame() {
     foods.push(new Food());
   }
   
-  // Ripristina il loop del gioco se era stato fermato
+  // Rimuove il pulsante Game Over
+  if (gameOverButton) {
+    gameOverButton.remove();
+    gameOverButton = null;
+  }
+  
+  // Ripristina il loop del gioco
   loop();
+  
+  // Reindirizza alla pagina del bunker dopo 1 secondo
+  setTimeout(() => {
+    window.location.href = 'bunker.html';
+  }, 1000);
 }
 
 // Classe per il personaggio
