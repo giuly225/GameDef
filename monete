@@ -1,0 +1,139 @@
+// Variabili per il personaggio, l'ostacolo, il punteggio e le monete
+let player;
+let obstacle;
+let coins = []; // Array per tenere traccia delle monete
+let score = 0; // Punteggio per il gioco
+let coinCount = 0; // Numero di monete raccolte
+
+function setup() {
+  createCanvas(800, 600); // Impostiamo la dimensione della finestra di gioco
+  player = new Player();   // Creiamo il nostro personaggio
+  obstacle = new Obstacle(); // Creiamo l'ostacolo
+  
+  // Creiamo alcune monete fisse in posizioni casuali
+  for (let i = 0; i < 5; i++) {
+    coins.push(new Coin());
+  }
+}
+
+function draw() {
+  background(220); // Colore di sfondo
+
+  player.update(); // Aggiorniamo la posizione del personaggio
+  player.display(); // Visualizziamo il personaggio
+
+  obstacle.update(); // Aggiorniamo la posizione dell'ostacolo
+  obstacle.display(); // Visualizziamo l'ostacolo
+
+  // Controlliamo se il personaggio tocca l'ostacolo
+  if (player.collidesWith(obstacle)) {
+    textSize(32);
+    fill(0);
+    text("Game Over", width / 2 - 100, height / 2);
+    noLoop(); // Ferma il gioco
+  }
+
+  // Incrementa il punteggio solo quando l'ostacolo è uscito dal fondo
+  if (obstacle.y > height) {
+    obstacle.y = 0; // Rientra dall'alto
+    obstacle.x = random(width); // Cambia posizione orizzontale
+    score++; // Incrementa il punteggio
+  }
+
+  // Controlliamo la raccolta delle monete
+  for (let i = coins.length - 1; i >= 0; i--) {
+    coins[i].display(); // Mostriamo la moneta
+
+    // Verifica se il personaggio raccoglie la moneta
+    if (player.collidesWith(coins[i])) {
+      coins.splice(i, 1); // Rimuove la moneta dall'array
+      coinCount++; // Incrementa il numero delle monete raccolte
+      // Aggiungi una nuova moneta in una posizione casuale
+      coins.push(new Coin());
+    }
+  }
+
+  // Visualizza il punteggio
+  textSize(32);
+  fill(0);
+  text("Punteggio: " + score, 10, 40); // Mostra il punteggio in alto a sinistra
+  
+  // Visualizza il numero di monete raccolte
+  textSize(32);
+  fill(0);
+  text("Monete: " + coinCount, 10, 80); // Mostra il numero di monete raccolte
+}
+
+// Classe per il personaggio
+class Player {
+  constructor() {
+    this.x = width / 2;
+    this.y = height - 50;
+    this.size = 50;
+  }
+
+  update() {
+    if (keyIsDown(LEFT_ARROW)) {
+      this.x -= 5; // Muove a sinistra
+    }
+    if (keyIsDown(RIGHT_ARROW)) {
+      this.x += 5; // Muove a destra
+    }
+    if (keyIsDown(UP_ARROW)) {
+      this.y -= 5; // Muove verso l'alto
+    }
+    if (keyIsDown(DOWN_ARROW)) {
+      this.y += 5; // Muove verso il basso
+    }
+  }
+
+  display() {
+    fill(0, 0, 255);
+    noStroke();
+    rect(this.x, this.y, this.size, this.size); // Disegna un rettangolo per il personaggio
+  }
+
+  collidesWith(obj) {
+    return (
+      this.x < obj.x + obj.size &&
+      this.x + this.size > obj.x &&
+      this.y < obj.y + obj.size &&
+      this.y + this.size > obj.y
+    ); // Verifica la collisione con l'oggetto (ostacolo o moneta)
+  }
+}
+
+// Classe per l'ostacolo
+class Obstacle {
+  constructor() {
+    this.x = random(width);
+    this.y = 0;
+    this.size = 50;
+    this.speed = 2;
+  }
+
+  update() {
+    this.y += this.speed; // L'ostacolo si muove verso il basso
+  }
+
+  display() {
+    fill(255, 0, 0);
+    noStroke();
+    rect(this.x, this.y, this.size, this.size); // Disegna l'ostacolo
+  }
+}
+
+// Classe per la moneta (le monete sono fisse)
+class Coin {
+  constructor() {
+    this.x = random(width); // Posizione orizzontale casuale
+    this.y = random(height); // Posizione verticale casuale
+    this.size = 30;
+  }
+
+  display() {
+    fill(255, 215, 0); // Colore oro per la moneta
+    noStroke();
+    ellipse(this.x, this.y, this.size, this.size); // Disegna la moneta
+  }
+}
