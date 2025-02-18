@@ -1,9 +1,13 @@
-// Variabili per il personaggio, l'ostacolo, il punteggio e le monete
+// Variabili per il personaggio, l'ostacolo e i contatori
 let player;
 let obstacle;
-let coins = []; // Array per tenere traccia delle monete
+let waters = []; // Array per l'acqua
+let medicines = []; // Array per i medicinali
+let foods = []; // Array per il cibo
 let score = 0; // Punteggio per il gioco
-let coinCount = 0; // Numero di monete raccolte
+let waterCount = 0; // Contatore acqua
+let medicineCount = 0; // Contatore medicinali
+let foodCount = 0; // Contatore cibo
 
 function setup() {
   createCanvas(800, 600); // Impostiamo la dimensione della finestra di gioco
@@ -16,9 +20,16 @@ function setup() {
   player = new Player();   // Creiamo il nostro personaggio
   obstacle = new Obstacle(); // Creiamo l'ostacolo
   
-  // Creiamo alcune monete fisse in posizioni casuali
+  // Creiamo gli oggetti raccolta
+  waters = []; // Array per l'acqua
+  medicines = []; // Array per i medicinali
+  foods = []; // Array per il cibo
+  
+  // Inizializziamo 5 oggetti di ogni tipo
   for (let i = 0; i < 5; i++) {
-    coins.push(new Coin());
+    waters.push(new Water());
+    medicines.push(new Medicine());
+    foods.push(new Food());
   }
 }
 
@@ -42,41 +53,62 @@ function draw() {
   // Incrementa il punteggio solo quando l'ostacolo è uscito dal fondo
   if (obstacle.y > height) {
     obstacle.y = 0; // Rientra dall'alto
-    obstacle.x = random(width);// Cambia posizione orizzontale
-     obstacle.size = obstacle.size * 1.1;
+    obstacle.x = random(width); // Cambia posizione orizzontale
     score++; // Incrementa il punteggio
   }
 
- 
+  // Aumenta la grandezza del personaggio quando il punteggio aumenta
+  if (score % 2 === 0 && score > 0) { // Ogni 5 punti aumentiamo la grandezza
+    player.size = player.size * 1.1; // Aumenta la grandezza del 8%
+    score++; // Incrementiamo il punteggio per evitare che si ripeta
+  }
 
-  // Controlliamo la raccolta delle monete
-  for (let i = coins.length - 1; i >= 0; i--) {
-    coins[i].display(); // Mostriamo la moneta
-
-    // Verifica se il personaggio raccoglie la moneta
-    if (player.collidesWith(coins[i])) {
-      coins.splice(i, 1); // Rimuove la moneta dall'array
-      coinCount++; // Incrementa il numero delle monete raccolte
-      // Aggiungi una nuova moneta in una posizione casuale
-      coins.push(new Coin());
+  // Gestiamo la raccolta degli oggetti
+  // Acqua
+  for (let i = waters.length - 1; i >= 0; i--) {
+    waters[i].display();
+    if (player.collidesWith(waters[i])) {
+      waters.splice(i, 1);
+      waterCount++;
+      waters.push(new Water());
     }
   }
 
-  // Visualizza il punteggio
+  // Medicinali
+  for (let i = medicines.length - 1; i >= 0; i--) {
+    medicines[i].display();
+    if (player.collidesWith(medicines[i])) {
+      medicines.splice(i, 1);
+      medicineCount++;
+      medicines.push(new Medicine());
+    }
+  }
+
+  // Cibo
+  for (let i = foods.length - 1; i >= 0; i--) {
+    foods[i].display();
+    if (player.collidesWith(foods[i])) {
+      foods.splice(i, 1);
+      foodCount++;
+      foods.push(new Food());
+    }
+  }
+
+  // Visualizza i contatori
   textSize(32);
   fill(0);
-  text("Punteggio: " + score, 10, 40); // Mostra il punteggio in alto a sinistra
-  
-  // Visualizza il numero di monete raccolte
-  textSize(32);
-  fill(0);
-  text("Monete: " + coinCount, 10, 80); // Mostra il numero di monete raccolte
+  text("Punteggio: " + score, 10, 40);
+  text("Acqua: " + waterCount, 10, 80);
+  text("Medicinali: " + medicineCount, 10, 120);
+  text("Cibo: " + foodCount, 10, 160);
 }
 
 function resetGame() {
-  // Resetta il punteggio e le monete
+  // Resetta il punteggio e i contatori
   score = 0;
-  coinCount = 0;
+  waterCount = 0;
+  medicineCount = 0;
+  foodCount = 0;
   
   // Resetta il personaggio
   player = new Player();
@@ -84,10 +116,16 @@ function resetGame() {
   // Resetta l'ostacolo
   obstacle = new Obstacle();
   
-  // Svuota e ricrea le monete
-  coins = [];
+  // Svuota e ricrea gli oggetti
+  waters = [];
+  medicines = [];
+  foods = [];
+  
+  // Ricrea 5 oggetti di ogni tipo
   for (let i = 0; i < 5; i++) {
-    coins.push(new Coin());
+    waters.push(new Water());
+    medicines.push(new Medicine());
+    foods.push(new Food());
   }
   
   // Ripristina il loop del gioco se era stato fermato
@@ -153,8 +191,8 @@ class Obstacle {
   }
 }
 
-// Classe per la moneta (le monete sono fisse)
-class Coin {
+// Classe per l'acqua (pallini blu)
+class Water {
   constructor() {
     this.x = random(width); // Posizione orizzontale casuale
     this.y = random(height); // Posizione verticale casuale
@@ -162,8 +200,43 @@ class Coin {
   }
 
   display() {
-    fill(255, 215, 0); // Colore oro per la moneta
+    fill(0, 0, 255); // Colore blu per l'acqua
     noStroke();
-    ellipse(this.x, this.y, this.size, this.size); // Disegna la moneta
+    ellipse(this.x, this.y, this.size, this.size); // Disegna un cerchio per l'acqua
   }
 }
+
+// Classe per il medicinale (triangoli bianchi)
+class Medicine {
+  constructor() {
+    this.x = random(width); // Posizione orizzontale casuale
+    this.y = random(height); // Posizione verticale casuale
+    this.size = 30;
+  }
+
+  display() {
+    fill(255); // Colore bianco per il medicinale
+    noStroke();
+    triangle(
+      this.x, this.y - this.size/2, // Punto superiore
+      this.x - this.size/2, this.y + this.size/2, // Punto sinistro
+      this.x + this.size/2, this.y + this.size/2  // Punto destro
+    ); // Disegna un triangolo per il medicinale
+  }
+}
+
+// Classe per il cibo (cerchi marroni)
+class Food {
+  constructor() {
+    this.x = random(width); // Posizione orizzontale casuale
+    this.y = random(height); // Posizione verticale casuale
+    this.size = 30;
+  }
+
+  display() {
+    fill(139, 69, 19); // Colore marrone per il cibo
+    noStroke();
+    ellipse(this.x, this.y, this.size, this.size); // Disegna un cerchio per il cibo
+  }
+}
+
