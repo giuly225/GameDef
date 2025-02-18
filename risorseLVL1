@@ -27,7 +27,7 @@ function setup() {
   foods = []; // Array per il cibo
   
   // Inizializziamo 5 oggetti di ogni tipo
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 5; i++) {
     waters.push(new Water());
     medicines.push(new Medicine());
     foods.push(new Food());
@@ -44,42 +44,37 @@ function draw() {
   obstacle.display(); // Visualizziamo l'ostacolo
 
   // Controlliamo se il personaggio tocca l'ostacolo
-// Controlliamo se il personaggio tocca l'ostacolo
-if (player.collidesWith(obstacle)) {
-  textSize(32);
-  fill(0);
-  text("Game Over", width / 2 - 100, height / 2);
-  
-  // Crea il pulsante "Torna al Bunker" solo quando è Game Over
-  if (!gameOverButton) {
-    gameOverButton = createButton('Torna al Bunker');
-    gameOverButton.position(width/2 - 60, height/2 + 50);
-    // Usa window.location invece di resetGame
-    gameOverButton.mousePressed(() => {
-      window.location.href = 'bunker.html';
-    });
+  if (player.collidesWith(obstacle)) {
+    textSize(32);
+    fill(0);
+    text("Game Over", width / 2 - 100, height / 2);
+    
+    // Crea il pulsante "Torna al Bunker" solo quando è Game Over
+    if (!gameOverButton) {
+      gameOverButton = createButton('Torna al Bunker');
+      gameOverButton.position(width/2 - 60, height/2 + 50);
+      // Usa window.location invece di resetGame
+      gameOverButton.mousePressed(() => {
+        window.location.href = 'bunker.html';
+      });
+    }
+    
+    noLoop(); // Ferma il gioco
+  } else {
+    // Rimuove il pulsante quando non è Game Over
+    if (gameOverButton) {
+      gameOverButton.remove();
+      gameOverButton = null;
+    }
   }
-  
-  noLoop(); // Ferma il gioco
-} else {
-  // Rimuove il pulsante quando non è Game Over
-  if (gameOverButton) {
-    gameOverButton.remove();
-    gameOverButton = null;
-  }
-}
-  
-  
-  
+
   // Incrementa il punteggio solo quando l'ostacolo è uscito dal fondo
   if (obstacle.y > height) {
     obstacle.y = 0; // Rientra dall'alto
     obstacle.x = random(width); // Cambia posizione orizzontale
-     obstacle.size = obstacle.size * 1.1; // Aumenta la grandezza del 8%
+    obstacle.size = obstacle.size * 1.1; // Aumenta la grandezza del 8%
     score++; // Incrementa il punteggio
   }
-
-  
 
   // Gestiamo la raccolta degli oggetti
   // Acqua
@@ -154,11 +149,6 @@ function resetGame() {
   
   // Ripristina il loop del gioco
   loop();
-  
-  // Reindirizza alla pagina del bunker dopo 1 secondo
-  setTimeout(() => {
-    window.location.href = 'bunker.html';
-  }, 1000);
 }
 
 // Classe per il personaggio
@@ -228,7 +218,7 @@ class Water {
     this.size = 30;
   }
 
-   display() {
+  display() {
     fill(153, 255, 255); // Colore blu per l'acqua
     stroke(0, 0, 255); // Contorno blu
     strokeWeight(2); // Spessore del contorno
