@@ -44,29 +44,30 @@ function draw() {
   obstacle.display(); // Visualizziamo l'ostacolo
 
   // Controlliamo se il personaggio tocca l'ostacolo
-  if (player.collidesWith(obstacle)) {
-    textSize(32);
-    fill(0);
-    text("Game Over", width / 2 - 100, height / 2);
-    
-    // Crea il pulsante "Torna al Bunker" solo quando è Game Over
-    if (!gameOverButton) {
-      gameOverButton = createButton('Torna al Bunker');
-      gameOverButton.position(width/2 - 60, height/2 + 50);
-      // Usa window.location invece di resetGame
-      gameOverButton.mousePressed(() => {
-        window.location.href = 'bunker.html';
-      });
-    }
-    
-    noLoop(); // Ferma il gioco
-  } else {
-    // Rimuove il pulsante quando non è Game Over
-    if (gameOverButton) {
-      gameOverButton.remove();
-      gameOverButton = null;
-    }
+ if (player.collidesWith(obstacle)) {
+  textSize(32);
+  fill(0);
+  text("Game Over", width / 2 - 100, height / 2);
+  
+  // Crea il pulsante "Torna al Bunker" solo quando è Game Over
+  if (!gameOverButton) {
+    gameOverButton = createButton('Torna al Bunker');
+    gameOverButton.position(width/2 - 60, height/2 + 50);
+    // Usa window.location con i parametri URL
+    gameOverButton.mousePressed(() => {
+      const url = `bunker.html?score=${score}&water=${waterCount}&medicines=${medicineCount}&food=${foodCount}`;
+      window.location.href = url;
+    });
   }
+  
+  noLoop(); // Ferma il gioco
+} else {
+  // Rimuove il pulsante quando non è Game Over
+  if (gameOverButton) {
+    gameOverButton.remove();
+    gameOverButton = null;
+  }
+}
 
   // Incrementa il punteggio solo quando l'ostacolo è uscito dal fondo
   if (obstacle.y > height) {
