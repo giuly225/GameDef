@@ -26,7 +26,7 @@ function setup() {
   foods = []; // Array per il cibo
   
   // Inizializziamo 5 oggetti di ogni tipo
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 3; i++) {
     waters.push(new Water());
     medicines.push(new Medicine());
     foods.push(new Food());
@@ -34,7 +34,7 @@ function setup() {
 }
 
 function draw() {
-  background(220); // Colore di sfondo
+  background(204,255,204); // Colore di sfondo
 
   player.update(); // Aggiorniamo la posizione del personaggio
   player.display(); // Visualizziamo il personaggio
@@ -54,14 +54,11 @@ function draw() {
   if (obstacle.y > height) {
     obstacle.y = 0; // Rientra dall'alto
     obstacle.x = random(width); // Cambia posizione orizzontale
+     obstacle.size = obstacle.size * 1.1; // Aumenta la grandezza del 8%
     score++; // Incrementa il punteggio
   }
 
-  // Aumenta la grandezza del personaggio quando il punteggio aumenta
-  if (score % 2 === 0 && score > 0) { // Ogni 5 punti aumentiamo la grandezza
-    player.size = player.size * 1.1; // Aumenta la grandezza del 8%
-    score++; // Incrementiamo il punteggio per evitare che si ripeta
-  }
+  
 
   // Gestiamo la raccolta degli oggetti
   // Acqua
@@ -199,9 +196,10 @@ class Water {
     this.size = 30;
   }
 
-  display() {
-    fill(0, 0, 255); // Colore blu per l'acqua
-    noStroke();
+   display() {
+    fill(153, 255, 255); // Colore blu per l'acqua
+    stroke(0, 0, 255); // Contorno blu
+    strokeWeight(2); // Spessore del contorno
     ellipse(this.x, this.y, this.size, this.size); // Disegna un cerchio per l'acqua
   }
 }
@@ -239,4 +237,3 @@ class Food {
     ellipse(this.x, this.y, this.size, this.size); // Disegna un cerchio per il cibo
   }
 }
-
