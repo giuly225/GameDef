@@ -1,0 +1,211 @@
+let playerImg, obstacleImg, waterImg, medicineImg, foodImg; // Variabili per le immagini
+
+function preload() {
+  // Carica le immagini
+  playerImg = loadImage('player.png');
+  obstacleImg = loadImage('obstacle.png');
+  waterImg = loadImage('water.png');
+  medicineImg = loadImage('medicine.png');
+  foodImg = loadImage('food.png');
+}
+
+function setup() {
+  createCanvas(800, 600); // Impostiamo la dimensione della finestra di gioco
+  
+  // Crea il pulsante di reset
+  let resetButton = createButton('Reset Partita');
+  resetButton.position(width - 120, 10);
+  resetButton.mousePressed(resetGame);
+  
+  player = new Player();   // Creiamo il nostro personaggio
+  obstacle = new Obstacle(); // Creiamo l'ostacolo
+  
+  // Crea gli oggetti raccolta
+  waters = [];
+  medicines = [];
+  foods = [];
+  
+  // Inizializziamo 5 oggetti di ogni tipo
+  for (let i = 0; i < 5; i++) {
+    waters.push(new Water());
+    medicines.push(new Medicine());
+    foods.push(new Food());
+  }
+}
+
+function draw() {
+  background(204, 255, 204); // Colore di sfondo
+
+  player.update(); // Aggiorniamo la posizione del personaggio
+  player.display(); // Visualizziamo il personaggio
+
+  obstacle.update(); // Aggiorniamo la posizione dell'ostacolo
+  obstacle.display(); // Visualizziamo l'ostacolo
+
+  // Controlliamo se il personaggio tocca l'ostacolo
+  if (player.collidesWith(obstacle)) {
+    textSize(32);
+    fill(0);
+    text("Game Over", width / 2 - 100, height / 2);
+    
+    // Crea il pulsante "Torna al Bunker" solo quando è Game Over
+    if (!gameOverButton) {
+      gameOverButton = createButton('Torna al Bunker');
+      gameOverButton.position(width/2 - 60, height/2 + 50);
+      gameOverButton.mousePressed(() => {
+        window.location.href = 'bunker.html';
+      });
+    }
+    
+    noLoop(); // Ferma il gioco
+  } else {
+    // Rimuove il pulsante quando non è Game Over
+    if (gameOverButton) {
+      gameOverButton.remove();
+      gameOverButton = null;
+    }
+  }
+
+  // Incrementa il punteggio solo quando l'ostacolo è uscito dal fondo
+  if (obstacle.y > height) {
+    obstacle.y = -obstacle.size; // Rientra dall'alto (fuori dallo schermo)
+    obstacle.x = random(width - obstacle.size); // Cambia posizione orizzontale
+    obstacle.size = obstacle.size * 1.1; // Aumenta la grandezza del 8%
+    score++; // Incrementa il punteggio
+  }
+
+  // Gestiamo la raccolta degli oggetti
+  // Acqua
+  for (let i = waters.length - 1; i >= 0; i--) {
+    waters[i].display();
+    if (player.collidesWith(waters[i])) {
+      waters.splice(i, 1);
+      waterCount++;
+      waters.push(new Water());
+      score++; // Incrementa il punteggio quando raccogli acqua
+    }
+  }
+
+  // Medicinali
+  for (let i = medicines.length - 1; i >= 0; i--) {
+    medicines[i].display();
+    if (player.collidesWith(medicines[i])) {
+      medicines.splice(i, 1);
+      medicineCount++;
+      medicines.push(new Medicine());
+      score++; // Incrementa il punteggio quando raccogli medicinali
+    }
+  }
+
+  // Cibo
+  for (let i = foods.length - 1; i >= 0; i--) {
+    foods[i].display();
+    if (player.collidesWith(foods[i])) {
+      foods.splice(i, 1);
+      foodCount++;
+      foods.push(new Food());
+      score++; // Incrementa il punteggio quando raccogli cibo
+    }
+  }
+
+  // Visualizza i contatori
+  textSize(32);
+  fill(0);
+  text("Punteggio: " + score, 10, 40);
+  text("Acqua: " + waterCount, 10, 80);
+  text("Medicinali: " + medicineCount, 10, 120);
+  text("Cibo: " + foodCount, 10, 160);
+}
+
+class Player {
+  constructor() {
+    this.x = width / 2;
+    this.y = height - 50;
+    this.size = 50; // Dimensione iniziale del personaggio
+  }
+
+  update() {
+    if (keyIsDown(LEFT_ARROW) && this.x > 0) {
+      this.x -= 5; // Muove a sinistra ma non oltre il bordo sinistro
+    }
+    if (keyIsDown(RIGHT_ARROW) && this.x + this.size < width) {
+      this.x += 5; // Muove a destra ma non oltre il bordo destro
+    }
+    if (keyIsDown(UP_ARROW) && this.y > 0) {
+      this.y -= 5; // Muove verso l'alto ma non oltre il bordo superiore
+    }
+    if (keyIsDown(DOWN_ARROW) && this.y + this.size < height) {
+      this.y += 5; // Muove verso il basso ma non oltre il bordo inferiore
+    }
+  }
+
+  display() {
+    image(playerImg, this.x, this.y, this.size, this.size); // Usa l'immagine per il personaggio
+  }
+
+  collidesWith(obj) {
+    return (
+      this.x < obj.x + obj.size &&
+      this.x + this.size > obj.x &&
+      this.y < obj.y + obj.size &&
+      this.y + this.size > obj.y
+    );
+  }
+}
+
+class Obstacle {
+  constructor() {
+    this.x = random(width - 50);
+    this.y = -50;
+    this.size = 50;
+    this.speed = 2;
+  }
+
+  update() {
+    this.y += this.speed;
+    if (this.y > height) {
+      this.y = -this.size;
+      this.x = random(width - this.size);
+    }
+  }
+
+  display() {
+    image(obstacleImg, this.x, this.y, this.size, this.size); // Usa l'immagine per l'ostacolo
+  }
+}
+
+class Water {
+  constructor() {
+    this.size = 30;
+    this.x = random(this.size, width - this.size);
+    this.y = random(this.size, height - this.size);
+  }
+
+  display() {
+    image(waterImg, this.x, this.y, this.size, this.size); // Usa l'immagine per l'acqua
+  }
+}
+
+class Medicine {
+  constructor() {
+    this.size = 30;
+    this.x = random(this.size, width - this.size);
+    this.y = random(this.size, height - this.size);
+  }
+
+  display() {
+    image(medicineImg, this.x, this.y, this.size, this.size); // Usa l'immagine per il medicinale
+  }
+}
+
+class Food {
+  constructor() {
+    this.size = 30;
+    this.x = random(this.size, width - this.size);
+    this.y = random(this.size, height - this.size);
+  }
+
+  display() {
+    image(foodImg, this.x, this.y, this.size, this.size); // Usa l'immagine per il cibo
+  }
+}
