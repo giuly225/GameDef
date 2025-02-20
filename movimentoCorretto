@@ -1,0 +1,269 @@
+// Variabili per il personaggio, l'ostacolo e i contatori
+let player;
+let obstacle;
+let gameOverButton; // Variabile per il pulsante Game Over
+let waters = []; // Array per l'acqua
+let medicines = []; // Array per i medicinali
+let foods = []; // Array per il cibo
+let score = 0; // Punteggio per il gioco
+let waterCount = 0; // Contatore acqua
+let medicineCount = 0; // Contatore medicinali
+let foodCount = 0; // Contatore cibo
+
+function setup() {
+  createCanvas(800, 600); // Impostiamo la dimensione della finestra di gioco
+  
+  // Crea il pulsante di reset
+  let resetButton = createButton('Reset Partita');
+  resetButton.position(width - 120, 10);
+  resetButton.mousePressed(resetGame);
+  
+  player = new Player();   // Creiamo il nostro personaggio
+  obstacle = new Obstacle(); // Creiamo l'ostacolo
+  
+  // Creiamo gli oggetti raccolta
+  waters = []; // Array per l'acqua
+  medicines = []; // Array per i medicinali
+  foods = []; // Array per il cibo
+  
+  // Inizializziamo 3 oggetti di ogni tipo
+  for (let i = 0; i < 3; i++) {
+    waters.push(new Water());
+    medicines.push(new Medicine());
+    foods.push(new Food());
+  }
+}
+
+function draw() {
+  background(204, 255, 204); // Colore di sfondo
+
+  player.update(); // Aggiorniamo la posizione del personaggio
+  player.display(); // Visualizziamo il personaggio
+
+  obstacle.update(); // Aggiorniamo la posizione dell'ostacolo
+  obstacle.display(); // Visualizziamo l'ostacolo
+
+  // Controlliamo se il personaggio tocca l'ostacolo
+  if (player.collidesWith(obstacle)) {
+    textSize(32);
+    fill(0);
+    text("Game Over", width / 2 - 100, height / 2);
+    
+    // Crea il pulsante "Torna al Bunker" solo quando è Game Over
+    if (!gameOverButton) {
+      gameOverButton = createButton('Torna al Bunker');
+      gameOverButton.position(width/2 - 60, height/2 + 50);
+      // Usa window.location invece di resetGame
+      gameOverButton.mousePressed(() => {
+        window.location.href = 'bunker.html';
+      });
+    }
+    
+    noLoop(); // Ferma il gioco
+  } else {
+    // Rimuove il pulsante quando non è Game Over
+    if (gameOverButton) {
+      gameOverButton.remove();
+      gameOverButton = null;
+    }
+  }
+
+  // Incrementa il punteggio solo quando l'ostacolo è uscito dal fondo
+  if (obstacle.y > height) {
+    obstacle.y = -obstacle.size; // Rientra dall'alto (fuori dallo schermo)
+    obstacle.x = random(width - obstacle.size); // Cambia posizione orizzontale
+    obstacle.size = obstacle.size * 1.1; // Aumenta la grandezza del 8%
+    score++; // Incrementa il punteggio
+  }
+
+  // Gestiamo la raccolta degli oggetti
+  // Acqua
+  for (let i = waters.length - 1; i >= 0; i--) {
+    waters[i].display();
+    if (player.collidesWith(waters[i])) {
+      waters.splice(i, 1);
+      waterCount++;
+      waters.push(new Water());
+    }
+  }
+
+  // Medicinali
+  for (let i = medicines.length - 1; i >= 0; i--) {
+    medicines[i].display();
+    if (player.collidesWith(medicines[i])) {
+      medicines.splice(i, 1);
+      medicineCount++;
+      medicines.push(new Medicine());
+    }
+  }
+
+  // Cibo
+  for (let i = foods.length - 1; i >= 0; i--) {
+    foods[i].display();
+    if (player.collidesWith(foods[i])) {
+      foods.splice(i, 1);
+      foodCount++;
+      foods.push(new Food());
+    }
+  }
+
+  // Visualizza i contatori
+  textSize(32);
+  fill(0);
+  text("Punteggio: " + score, 10, 40);
+  text("Acqua: " + waterCount, 10, 80);
+  text("Medicinali: " + medicineCount, 10, 120);
+  text("Cibo: " + foodCount, 10, 160);
+}
+
+function resetGame() {
+  // Resetta il punteggio e i contatori
+  score = 0;
+  waterCount = 0;
+  medicineCount = 0;
+  foodCount = 0;
+  
+  // Resetta il personaggio
+  player = new Player();
+  
+  // Resetta l'ostacolo
+  obstacle = new Obstacle();
+  
+  // Svuota e ricrea gli oggetti
+  waters = [];
+  medicines = [];
+  foods = [];
+  
+  // Ricrea 3 oggetti di ogni tipo
+  for (let i = 0; i < 3; i++) {
+    waters.push(new Water());
+    medicines.push(new Medicine());
+    foods.push(new Food());
+  }
+  
+  // Rimuove il pulsante Game Over
+  if (gameOverButton) {
+    gameOverButton.remove();
+    gameOverButton = null;
+  }
+  
+  // Ripristina il loop del gioco
+  loop();
+}
+
+// Classe per il personaggio
+class Player {
+  constructor() {
+    this.x = width / 2;
+    this.y = height - 50;
+    this.size = 50; // Dimensione iniziale del personaggio
+  }
+
+  update() {
+    if (keyIsDown(LEFT_ARROW) && this.x > 0) {
+      this.x -= 5; // Muove a sinistra ma non oltre il bordo sinistro
+    }
+    if (keyIsDown(RIGHT_ARROW) && this.x + this.size < width) {
+      this.x += 5; // Muove a destra ma non oltre il bordo destro
+    }
+    if (keyIsDown(UP_ARROW) && this.y > 0) {
+      this.y -= 5; // Muove verso l'alto ma non oltre il bordo superiore
+    }
+    if (keyIsDown(DOWN_ARROW) && this.y + this.size < height) {
+      this.y += 5; // Muove verso il basso ma non oltre il bordo inferiore
+    }
+  }
+
+  display() {
+    fill(0, 0, 255);
+    noStroke();
+    rect(this.x, this.y, this.size, this.size); // Disegna un rettangolo per il personaggio
+  }
+
+  collidesWith(obj) {
+    return (
+      this.x < obj.x + obj.size &&
+      this.x + this.size > obj.x &&
+      this.y < obj.y + obj.size &&
+      this.y + this.size > obj.y
+    ); // Verifica la collisione con l'oggetto (ostacolo o moneta)
+  }
+}
+
+// Classe per l'ostacolo
+class Obstacle {
+  constructor() {
+    this.x = random(width - 50); // Posizione orizzontale casuale
+    this.y = -50; // Posizione iniziale fuori dallo schermo (sopra)
+    this.size = 50;
+    this.speed = 2; // Velocità dell'ostacolo
+  }
+
+  update() {
+    this.y += this.speed; // L'ostacolo scende verso il basso
+    
+    // Se l'ostacolo esce dal bordo inferiore, lo riposizioniamo in alto
+    if (this.y > height) {
+      this.y = -this.size; // Riposiziona l'ostacolo fuori dallo schermo
+      this.x = random(width - this.size); // Cambia posizione orizzontale
+       obstacle.size = obstacle.size * 1.1; // Aumenta la grandezza del 8%
+      score++;
+    }
+  }
+
+  display() {
+    fill(255, 0, 0);
+    noStroke();
+    rect(this.x, this.y, this.size, this.size); // Disegna l'ostacolo
+  }
+}
+
+// Classe per l'acqua (pallini blu)
+class Water {
+  constructor() {
+    this.size = 30;
+    this.x = random(this.size, width - this.size); // Limita la posizione orizzontale
+    this.y = random(this.size, height - this.size); // Limita la posizione verticale
+  }
+
+  display() {
+    fill(153, 255, 255); // Colore blu per l'acqua
+    stroke(0, 0, 255); // Contorno blu
+    strokeWeight(2); // Spessore del contorno
+    ellipse(this.x, this.y, this.size, this.size); // Disegna un cerchio per l'acqua
+  }
+}
+
+// Classe per il medicinale (triangoli bianchi)
+class Medicine {
+  constructor() {
+    this.size = 30;
+    this.x = random(this.size, width - this.size); // Limita la posizione orizzontale
+    this.y = random(this.size, height - this.size); // Limita la posizione verticale
+  }
+
+  display() {
+    fill(255); // Colore bianco per il medicinale
+    noStroke();
+    triangle(
+      this.x, this.y - this.size / 2, // Punto superiore
+      this.x - this.size / 2, this.y + this.size / 2, // Punto sinistro
+      this.x + this.size / 2, this.y + this.size / 2 // Punto destro
+    ); // Disegna un triangolo per il medicinale
+  }
+}
+
+// Classe per il cibo (cerchi marroni)
+class Food {
+  constructor() {
+    this.size = 30;
+    this.x = random(this.size, width - this.size); // Limita la posizione orizzontale
+    this.y = random(this.size, height - this.size); // Limita la posizione verticale
+  }
+
+  display() {
+    fill(139, 69, 19); // Colore marrone per il cibo
+    noStroke();
+    ellipse(this.x, this.y, this.size, this.size); // Disegna un cerchio per il cibo
+  }
+}
