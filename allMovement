@@ -1,0 +1,94 @@
+// Variabile globale per tenere traccia dell'immagine corrente
+let currentImageIndex = 0;
+
+// Array per memorizzare le immagini
+let images = [];
+
+// Posizione del personaggio
+let xPos, yPos;
+
+// Variabili per controllare il tempo di cambio immagine
+let lastChangeTime = 0;
+const changeInterval = 100; // Intervallo di tempo in millisecondi (100ms = 0.1 secondi)
+
+function preload() {
+    // Carica le immagini prima che lo sketch inizi
+    images['avanti'] = [
+        loadImage('avanti_d.png'),
+        loadImage('avanti_u.png'),
+        loadImage('avanti_s.png'),
+        loadImage('avanti_u.png')
+    ];
+    images['indietro'] = [
+        loadImage('indietro_d.png'),
+        loadImage('indietro_u.png'),
+        loadImage('indietro_s.png'),
+        loadImage('indietro_u.png')
+    ];
+    images['destra'] = [
+        loadImage('destra_d.png'),
+        loadImage('destra_u.png'),
+        loadImage('destra_s.png'),
+        loadImage('destra_u.png')
+    ];
+    images['sinistra'] = [
+        loadImage('sinistra_d.png'),
+        loadImage('sinistra_u.png'),
+        loadImage('sinistra_s.png'),
+        loadImage('sinistra_u.png')
+    ];
+}
+
+function setup() {
+    createCanvas(700, 500);
+
+    // Inizializza la posizione del personaggio al centro del canvas
+    xPos = width / 2;
+    yPos = height / 2;
+}
+
+function draw() {
+    background(220);
+
+    // Disegna l'immagine corrente
+    if (images[currentDirection] && images[currentDirection][currentImageIndex]) {
+        image(images[currentDirection][currentImageIndex], xPos, yPos);
+    }
+
+    // Gestisci il movimento continuo e l'animazione
+    handleMovement();
+}
+
+let currentDirection = 'avanti'; // Direzione corrente
+
+function handleMovement() {
+    let isMoving = false; // Variabile per verificare se il personaggio si sta muovendo
+
+    // Controlla se un tasto è premuto e aggiorna la posizione e la direzione
+    if (keyIsDown(LEFT_ARROW)) {
+        currentDirection = 'sinistra';
+        xPos -= 5; // Muovi a sinistra
+        isMoving = true;
+    } else if (keyIsDown(RIGHT_ARROW)) {
+        currentDirection = 'destra';
+        xPos += 5; // Muovi a destra
+        isMoving = true;
+    } else if (keyIsDown(UP_ARROW)) {
+        currentDirection = 'indietro';
+        yPos -= 5; // Muovi in avanti (su)
+        isMoving = true;
+    } else if (keyIsDown(DOWN_ARROW)) {
+        currentDirection = 'avanti';
+        yPos += 5; // Muovi indietro (giù)
+        isMoving = true;
+    }
+
+    // Se il personaggio si sta muovendo, cambia l'immagine per l'animazione
+    if (isMoving) {
+        // Verifica se è passato abbastanza tempo dall'ultimo cambio di immagine
+        if (millis() - lastChangeTime > changeInterval) {
+            currentImageIndex = (currentImageIndex + 1) % images[currentDirection].length;
+            lastChangeTime = millis(); // Aggiorna il tempo dell'ultimo cambio
+        }
+    }
+}
